@@ -1,0 +1,6 @@
+efficacy <- readRDS("data/Efficacy.rds")
+weight_gain <- readRDS("data/Weight Gain.rds")
+
+# Save them in package‑compatible format
+save(efficacy, file = "data/efficacy.rda")
+save(weight_gain, file = "data/weight_gain.rda")
