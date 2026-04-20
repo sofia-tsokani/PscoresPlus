@@ -1,0 +1,30 @@
+Package: PscoresPlus
+Type: Package
+Title: PscoresPlus
+Version: 0.1.0
+Authors@R: c(
+    person("Sofia", "Tsokani", email = "stsokani@auth.gr", role = c("aut", "cre")),
+    person("Augustine", "Wigle", role = c("aut")),
+    person("Dimitris", "Mavridis", role = c("aut")),
+    person("Adriani", "Nikolakopoulou", role = c("aut"))
+  )
+Description: PscoresPlus is an R package for summarising and interpreting treatment hierarchies from
+    network meta-analysis (NMA) using extended P-scores. It helps users explore how rankings change
+    when different clinically important values (CIVs) are assumed, including uncertainty in the choice
+    of CIV. The package quantifies hierarchy stability using P-score residuals and Precision of
+    Treatment Hierarchy (POTH). It provides the Area Under the P-score Curve (AUPC) to rank treatments
+    across a range of CIVs and multiple outcomes simultaneously. It also includes graphical tools to
+    compare and visualize treatment hierarchies across outcomes and CIV ranges.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Imports:
+    stringr,
+    mvtnorm,
+    readxl,
+    netmeta,
+    dplyr,
+    ggplot2,
+    writexl
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
