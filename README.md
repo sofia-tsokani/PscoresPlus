@@ -19,7 +19,7 @@ An R package for computing extended P-scores across clinically important value (
 ### From GitHub
 ```r
 install.packages("remotes")
-remotes::install_github("yourname/PscoresPlus")
+remotes::install_github("sofia-tsokani/PscoresPlus")
 ```
 
 ## Usage
