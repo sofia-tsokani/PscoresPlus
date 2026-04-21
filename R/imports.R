@@ -1,4 +1,12 @@
-#' Package imports
+#' @title PscoresPlus: Extended P-scores for Network Meta-Analysis
+#'
+#' @description
+#' PscoresPlus extends the P-score framework for ranking treatments in Network
+#' Meta-Analysis (NMA) by incorporating Clinically Important Values (CIVs).
+#'
+#' @name PscoresPlus-package
+#' @aliases PscoresPlus
+#' @keywords internal
 #'
 #' @importFrom dplyr group_by mutate across all_of
 #' @importFrom tidyr pivot_longer
