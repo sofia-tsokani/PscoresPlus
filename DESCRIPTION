@@ -1,6 +1,6 @@
 Package: PscoresPlus
 Type: Package
-Title: PscoresPlus
+Title: Extended P-Scores for Treatment Ranking in Network Meta-Analysis
 Version: 0.1.0
 Authors@R: c(
     person("Sofia", "Tsokani", email = "stsokani@auth.gr", role = c("aut", "cre")),
@@ -15,16 +15,24 @@ Description: PscoresPlus is an R package for summarising and interpreting treatm
     Treatment Hierarchy (POTH). It provides the Area Under the P-score Curve (AUPC) to rank treatments
     across a range of CIVs and multiple outcomes simultaneously. It also includes graphical tools to
     compare and visualize treatment hierarchies across outcomes and CIV ranges.
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+Depends:
+    R (>= 4.1.0)
 Imports:
-    stringr,
-    mvtnorm,
-    readxl,
-    netmeta,
     dplyr,
     ggplot2,
+    mvtnorm,
+    netmeta,
+    readxl,
+    stringr,
+    tibble,
+    tidyr,
     writexl
+Suggests:
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
