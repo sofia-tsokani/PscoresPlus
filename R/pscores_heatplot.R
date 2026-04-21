@@ -1,11 +1,59 @@
-#' Heatplots
+#' Heat plot of treatment rankings across CIV combinations
 #'
-#' @name pscores_heatplot
-#' @title Heatplot for 2 outcomes
-#' @param x object from running pscore_civs
-#' @param title optional title for plot
-#' @param outcome1 Name for outcome 1
-#' @param outcome2 Name for outcome 2
+#' @description
+#' Visualises treatment rankings across a grid of clinically important values
+#' (CIV) for exactly two outcomes as a heat plot. Each facet represents one
+#' treatment, with the two CIV axes on the x and y axes and the rank based on
+#' the extended P-score shown as a colour gradient. This provides granular
+#' information about the specific regions of CIV combinations where a treatment
+#' performs better or worse than others, complementing the AUPC summary.
+#'
+#' @param x An object of class \code{"pscore_civs"} as returned by
+#'   \code{pscore_civs()}, containing the extended P-scores and rankings
+#'   across all CIV combinations.
+#' @param title Optional character string for the plot title. Defaults to
+#'   \code{""} (no title).
+#' @param outcome1 Optional character string for the x-axis label for the
+#'   first outcome. Defaults to \code{"Outcome 1"}.
+#' @param outcome2 Optional character string for the y-axis label for the
+#'   second outcome. Defaults to \code{"Outcome 2"}.
+#'
+#' @details
+#' The function requires exactly two outcomes. Treatments are ordered in the
+#' facets by their mean P-score across all CIV combinations, from highest
+#' to lowest.
+#'
+#' @return A \code{ggplot2} object. The plot is not printed automatically and
+#'   can be displayed by calling the returned object or saved with
+#'   \code{ggplot2::ggsave()}.
+#'
+#' @seealso \code{\link{pscore_civs}}, \code{\link{pscores_pothplot}},
+#'   \code{\link{aupc}}
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' data("efficacy")
+#' data("weight_gain")
+#'
+#' cor_mat <- matrix(c(1, -0.5, -0.5, 1), nrow = 2, byrow = TRUE)
+#'
+#' out <- pscore_civs(
+#'   list(efficacy, weight_gain),
+#'   CIVs        = list(seq(0,  0.5, length.out = 50),
+#'                      seq(-0.5, 0, length.out = 50)),
+#'   correlation = cor_mat,
+#'   type        = c("H", "H")
+#' )
+#'
+#' pscores_heatplot(
+#'   out,
+#'   title    = "Efficacy & Weight Gain",
+#'   outcome1 = "Efficacy",
+#'   outcome2 = "Weight Gain"
+#' )
+#' }
 pscores_heatplot <- function(x, title = "", outcome1 = "Outcome 1", outcome2 = "Outcome 2") {
 
   if(ncol(x$CIVs) != 2) {

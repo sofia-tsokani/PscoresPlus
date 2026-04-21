@@ -1,26 +1,84 @@
 #' Compute extended P-scores across CIV combinations
 #'
-#' Computes P-scores for all treatments across combinations of clinically
-#' important values (CIVs) for one or more outcomes.
+#' @description
+#' Computes extended P-scores for all treatments across combinations of
+#' clinically important values (CIVs) for one or more outcomes. For each
+#' CIV combination, treatment ranking, Precision of Treatment Hierarchy
+#' (POTH) and residual Pscores are also computed. Optionally, results can be exported to an
+#' Excel file.
 #'
-#' @param x A list of `netmeta` objects.
-#' @param CIVs A list of CIV values to explore. Its length must match the
-#'   number of outcomes.
-#' @param correlation The correlation matrix describing the correlation
-#'   between the outcomes, or `NULL` to assume zero correlation.
-#' @param type A character vector describing the type of outcomes:
-#'   `"H"` for harmful and `"B"` for beneficial.
-#' @param excel Logical; if `TRUE`, exports the full results to an Excel file.
+#' @param x A list of \code{netmeta} objects, one per outcome.
+#' @param CIVs A list of numeric vectors specifying the CIV values to explore,
+#'   one per outcome. Its length must equal the number of outcomes.
+#' @param correlation A square numeric correlation matrix of dimension k x k,
+#'   where k is the number of outcomes. Use \code{NULL} or \code{diag(k)} to
+#'   assume independence.
+#' @param type A character vector of length equal to the number of outcomes,
+#'   specifying the outcome type: \code{"H"} for harmful and \code{"B"} for
+#'   beneficial.
+#' @param excel Logical. If \code{TRUE}, exports results to a timestamped
+#'   Excel file in the working directory. Default is \code{FALSE}.
 #'
-#' @return An object of class `pscore_civs`, containing:
-#' \itemize{
-#'   \item `all`: long-format results including P-scores, rankings, POTH, and residuals.
-#'   \item `pscores`: matrix of P-scores across CIV combinations.
-#'   \item `CIVs`: data frame of CIV combinations.
-#'   \item `labels`: treatment labels.
-#' }
+#' @return An object of class \code{pscore_civs}
+#'
+#'
+#' @seealso
+#' \code{\link{aupc}}, \code{\link{plot_civsummary}},
+#' \code{\link{plot_pscores}}, \code{\link{pscores_heatplot}},
+#' \code{\link{pscores_pothplot}}, \code{\link{plot_aupc_pscore}}
 #'
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Efficacy
+#' # Estimating P-scores for a CIV of 0.5.
+#' data("efficacy")
+#' out_eff <- pscore_civs(
+#'   list(efficacy),
+#'   CIVs        = 0.5,
+#'   correlation = NULL,
+#'   type        = "H"
+#' )
+#' out_eff
+#'
+#' # Weight Gain
+#' # Estimating P-scores for a CIV of -0.5.
+#' data("weight_gain")
+#' out_wg <- pscore_civs(
+#'   list(weight_gain),
+#'   CIVs        = -0.5,
+#'   correlation = NULL,
+#'   type        = "H"
+#' )
+#' out_wg
+#'
+#' # Both outcomes
+#' # Correlation between efficacy and weight gain assumed to be -0.5.
+#' cor_mat <- matrix(c( 1.0, -0.5,
+#'                     -0.5,  1.0),
+#'                   nrow  = 2,
+#'                   byrow = TRUE)
+#'
+#' # Single CIV per outcome
+#' out1 <- pscore_civs(
+#'   list(efficacy, weight_gain),
+#'   CIVs        = list(0.5, -0.5),
+#'   correlation = cor_mat,
+#'   type        = c("H", "H")
+#' )
+#' out1
+#'
+#' # Multiple CIVs for weight gain; export results to Excel
+#' out2 <- pscore_civs(
+#'   list(efficacy, weight_gain),
+#'   CIVs        = list(0.5, c(-0.3, -0.5)),
+#'   correlation = cor_mat,
+#'   type        = c("H", "H"),
+#'   excel       = TRUE
+#' )
+#' out2
+#' }
 
 pscore_civs<- function(x, CIVs, correlation, type, excel = FALSE) {
 

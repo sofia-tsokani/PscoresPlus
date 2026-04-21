@@ -1,17 +1,70 @@
-#' Plotting for a single outcome
-#' @name plot_pscores
-#' @title Plot Pscores
-#' @description Creates a graph of Pscores or residual Pscores
-#' @param x object from running pscore_civs. only accommodates objects where
-#' only one outcome has varying CIV
-#' @param CIVs numeric vector of CIV values
-#' @param type "B" or "H" (outcome type)
-#' @param top_n number of top interventions to highlight (default: 5)
-#' @param residuals Logical - should P-score residuals or raw p-scores be plotted?
-#' Default is TRUE
+#' Plot P-scores or residual P-scores across CIV values for a single outcome
 #'
-#' @return A `ggplot2` object.
+#' @description
+#' Plots the extended P-scores or residual P-scores across a range of
+#' clinically important values (CIV) for a single outcome. The top-ranked
+#' interventions are highlighted with distinct colours. A dashed reference
+#' line is added to aid interpretation; for extended P-scores it corresponds
+#' to the average P-score, while for residual P-scores it is approximately
+#' zero.
+#'
+#' @param x A list containing a single \code{netmeta} object. If a list of
+#'   multiple outcomes is supplied, the function stops with an error.
+#' @param CIVs A numeric vector of CIV values at which P-scores are evaluated.
+#' @param type A single character string specifying the outcome type:
+#'   \code{"B"} (beneficial) or \code{"H"} (harmful).
+#' @param top_n A positive integer indicating the number of top-ranked
+#'   interventions to highlight. Defaults to \code{5}.
+#' @param residuals Logical. If \code{TRUE}, residual P-scores are plotted by
+#'   subtracting the row mean across interventions at each CIV value. If
+#'   \code{FALSE}, raw P-scores are plotted. Defaults to \code{TRUE}.
+#'
+#' @details
+#' This function is intended for single-outcome objects only.
+#'
+#' When \code{residuals = TRUE}, each treatment's P-score is centred by
+#' subtracting the row mean across all treatments at each CIV value. This
+#' highlights relative rather than absolute performance, and the dashed mean
+#' line is approximately zero.
+#'
+#' When \code{residuals = FALSE}, raw P-scores are plotted. In both cases,
+#' the top \code{top_n} interventions are identified at the first CIV value
+#' and highlighted in colour, while the remaining interventions are shown
+#' in black.
+#'
+#' @return A \code{ggplot2} object depicting extended P-scores or residual
+#'   P-scores across the specified CIV values.
+#'
+#' @seealso \code{\link{pscore_civs}}, \code{\link{aupc}}
+#'
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' data("efficacy")
+#'
+#' # Extended P-scores
+#' plot_pscores(
+#'   list(efficacy),
+#'   CIVs      = seq(0, 0.5, 0.1),
+#'   type      = "H",
+#'   top_n     = 5,
+#'   residuals = FALSE
+#' )
+#'
+#' # Residual P-scores
+#' plot_pscores(
+#'   list(efficacy),
+#'   CIVs      = seq(0, 0.5, 0.1),
+#'   type      = "H",
+#'   top_n     = 5,
+#'   residuals = TRUE
+#' )
+#' }
+plot_pscores <- function(x, CIVs, type, top_n = 5, residuals = TRUE) {
+  # ... your function code
+}
+
 plot_pscores <- function(x, CIVs, type, top_n = 5, residuals = TRUE) {
 
   # ---- checks that should stop execution ----
