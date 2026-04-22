@@ -247,26 +247,27 @@ plot_pscores <- function(x, CIVs, type, top_n = 5, residuals = TRUE) {
     labs(
       x = "CIV",
       y = y_label,
-      color = paste0(length(best), " Top ranked interventions\nat CIV = " , CIVs[1] ,"."),
+      color = paste0(length(best), " Top ranked interventions at CIV = " , CIVs[1] ,"."),
       title = plot_title,
       subtitle = plot_subtitle
     ) +
     theme_minimal() +
     theme(
-      panel.background  = element_rect(fill = "grey90", colour = NA),
-      plot.background   = element_rect(fill = "grey95", colour = NA),
-      legend.background = element_rect(fill = "grey95", colour = NA),
-      legend.key        = element_rect(fill = "grey95", colour = NA),
-      panel.border      = element_rect(colour = "grey80", fill = NA, linewidth = 0.4),
-      panel.grid.major  = element_line(linewidth = 0.35, colour = "grey80"),
+      panel.background   = element_rect(fill = "grey90", colour = NA),
+      plot.background    = element_rect(fill = "grey95", colour = NA),
+      legend.background  = element_rect(fill = "grey95", colour = NA),
+      legend.key         = element_rect(fill = "grey95", colour = NA),
+      panel.border       = element_rect(colour = "grey80", fill = NA, linewidth = 0.4),
+      panel.grid.major   = element_line(linewidth = 0.35, colour = "grey80"),
       panel.grid.minor.y = element_line(linewidth = 0.25, colour = "grey80"),
       panel.grid.minor.x = element_blank(),
-      text              = element_text(colour = "grey30"),
-      plot.title        = element_text(colour = "grey20", face = "bold"),
-      plot.subtitle     = element_text(colour = "grey35"),
-      axis.text         = element_text(colour = "grey35"),
-      legend.title      = element_text(colour = "grey30"),
-      legend.text       = element_text(colour = "grey35")
+      text               = element_text(colour = "grey30"),
+      plot.title         = element_text(colour = "grey20", face = "bold"),
+      plot.caption       = element_text(colour = "grey35", hjust = 0.5, margin = margin(t = 10)),
+      axis.text          = element_text(colour = "grey35"),
+      legend.title       = element_text(colour = "grey30"),
+      legend.text        = element_text(colour = "grey35"),
+      legend.position = "bottom"
     )
 
   print(gg)
