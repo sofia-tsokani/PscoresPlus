@@ -1,0 +1,367 @@
+---
+title: "PscoresPlus Package"
+subtitle: "Revisiting Extended P-scores: A Quantitative and Graphical Toolkit for Interpretation"
+output: 
+   rmarkdown::pdf:
+vignette: >
+  %\VignetteIndexEntry{Introduction to PscoresPlus}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+**PscoresPlus** is an R package for summarizing and interpreting treatment hierarchies from
+    network meta-analysis (NMA) using extended P-scores. It aims to help users explore how rankings change
+    when different clinically important values (CIVs) are assumed, including uncertainty in the choice
+    of CIV. The package quantifies hierarchy stability using P-score residuals and Precision of
+    Treatment Hierarchy (POTH). It provides the Area Under the P-score Curve (AUPC) to rank treatments
+    across a range of CIVs and multiple outcomes simultaneously. It also includes graphical tools to
+    compare and visualize treatment hierarchies across outcomes and CIV ranges.
+
+## Installation
+
+```{r install, eval = FALSE}
+# Install from CRAN (when available)
+install.packages("PscoresPlus")
+
+# Or install the development version from GitHub
+# install.packages("remotes")
+remotes::install_github("sofia-tsokani/PscoresPlus")
+```
+
+## Loading the Package
+
+```{r load}
+library(PscoresPlus)
+```
+
+## Datasets
+
+The package includes two built-in datasets from a published network meta-analysis of antipsychotic drugs in schizophrenia (Leucht et al., 2013). Both have been included as `netmeta` objects and contain treatment effects (TE), corresponding standard errors (seTE), treatment comparisons, and study labels. In both cases, treatment effects are expressed as standardized mean differences (SMD).
+
+
+> *Reference: Leucht S, Cipriani A, Spineli L, et al. Comparative efficacy and tolerability of 15 antipsychotic drugs in schizophrenia: a multiple-treatments meta-analysis. Lancet. 2013;382(9896):951–962.  
+> [https://doi.org/10.1016/S0140-6736(13)60733-3](https://doi.org/10.1016/S0140-6736(13)60733-3)*
+
+### Efficacy
+
+A network of **167 RCTs** comparing **15
+antipsychotic treatments and placebo** on treatment efficacy (overall change in symptoms as measured with several scales). Although efficacy is inherently beneficial, it is treated as a **harmful outcome**:  a greater reduction in symptoms indicates better treatment performance. Treatment effects are expressed as standardized mean differences (SMD).
+
+```{r}
+#import dataset on efficacy outcome
+data("efficacy")
+```
+
+### Weight Gain
+
+A network of **86 RCTs** comparing **15
+antipsychotic treatments and placebo**. This dataset
+focuses on **weight gain** as a continuous outcome. Weight gain is treated as a **harmful outcome**, so treatments associated with smaller increases in weight are considered more favorable. Treatment effects are expressed as standardized mean differences (SMD).
+
+```{r}
+#import dataset on wight gean outcome
+data("weight_gain")
+```
+
+## Extended P-scores
+
+### Single Outcome Example
+
+When analysing a single outcome, supply the outcome of interest as a single-element list of the corresponding `netmeta` object, the CIV to be evaluated, and the outcome type ( `"H"` for harmful or `"B"` for beneficial). Set `excel = TRUE` to export the results directly to a timestamped Excel file.
+
+The function provides:
+
+- *Extended P-scores* per treatment
+- *Treatment rankings* (1 = best)
+- *Precision of Treatment Hierarchy (PoTH)*
+- *P-score residuals*
+
+
+#### Efficacy Outcome
+
+In this example, we compute extended P-scores for a single outcome (efficacy), treating it as a **harmful** outcome with a CIV of **0.5**.
+
+```{r single-outcome}
+out_eff <- pscore_civs(
+  x           = list(efficacy),
+  CIVs        = 0.5,
+  correlation = NULL,
+  type        = "H"
+)
+
+out_eff
+```
+
+#### Weight Gain Outcome
+
+Here we repeat the analysis for weight gain, a harmful outcome, using a CIV of **-0.5**.
+
+```{r weight-gain}
+data("weight_gain")
+
+out_wg <- pscore_civs(
+  x           = list(weight_gain),
+  CIVs        = -0.5,
+  type        = "H", 
+  excel = FALSE #setting the excel argument to TRUE allows for exporting results to a timestamped Excel file
+)
+
+out_wg
+```
+
+### Multiple Outcomes Example
+
+When analysing multiple outcomes simultaneously, you must supply:
+
+1. A *list of `netmeta` objects*, one per outcome
+2. A *list of CIV vectors*, one per outcome
+3. A *correlation matrix* between outcomes
+4. A *`type` vector* specifying whether each outcome is harmful (`"H"`) or beneficial (`"B"`)
+
+### Defining the Correlation Matrix
+
+We assume a correlation of **−0.5** between efficacy and weight gain:
+
+```{r cor-matrix}
+cor_mat <- matrix(
+  c( 1.0, -0.5,
+    -0.5,  1.0),
+  nrow   = 2,
+  byrow  = TRUE
+)
+cor_mat
+```
+
+### Single CIV per Outcome
+
+```{r multi-single-civ}
+out1 <- pscore_civs(
+  x           = list(efficacy, weight_gain),
+  CIVs        = list(0.5, -0.5),
+  correlation = cor_mat,
+  type        = c("H", "H")
+)
+
+out1
+```
+
+### Multiple CIVs per Outcome
+
+You can supply **multiple CIV values** for any outcome. The function evaluates all the CIV combinations. In the example below, weight gain has two CIVs (−0.3 and −0.5), yielding *2 combinations* in total.
+
+```{r multi-multi-civ}
+out2 <- pscore_civs(
+  x           = list(efficacy, weight_gain),
+  CIVs        = list(0.5, c(-0.3, -0.5)),
+  correlation = cor_mat,
+  type        = c("H", "H"),
+  excel       = FALSE #setting the excel argument to TRUE allows for exporting results to a timestamped Excel file
+)
+
+out2
+```
+
+> Tip: Set the argument `excel = TRUE` to automatically export results to a timestamped Excel file (e.g., `pscore_civs_20260421_221800.xlsx`) in your working directory.
+
+### Understanding the Output
+
+The returned object is of class `"pscore_civs"` and includes the following items:
+
+| Column | Description |
+|---|---|
+| `Treatment` | Treatment label |
+| `Pscore` | Raw extended P-score under that CIV combination |
+| `ranking` | Rank of the treatment (1 = best) |
+| `residuals` | P-score residuals |
+| `poth` | Precision of Treatment Hierarchy (PoTH) |
+
+
+## Visualizing P-scores Across CIVs
+
+The `plot_pscores()` function plots extended P-scores or residual P-scores (default) across a range of CIV values for a single outcome. The top `top_n` treatments are highlighted in colour; a dashed reference line marks the mean P-score or approximately zero for residuals.
+As with `pscore_civs()`, supply the outcome as a single-element list containing
+the `netmeta` object, a numeric vector of CIV values to evaluate, and the
+outcome type (`"H"` for harmful or `"B"` for beneficial).
+
+### Extended P-scores
+
+```{r, fig.width = 10, fig.height = 6, fig.align = "center", out.width = "100%"}
+plot_pscores(
+  x         = list(efficacy),
+  CIVs      = seq(0, 0.5, 0.1),
+  type      = "H",
+  top_n     = 5,
+  residuals = FALSE
+)
+
+
+```
+
+### Residual P-scores
+
+Residual P-scores centre each treatment's P-score by subtracting the row mean
+across all treatments at each CIV value.
+
+```{r, fig.width = 10, fig.height = 6, fig.align = "center", out.width = "100%"}
+plot_pscores(
+  x         = list(efficacy),
+  CIVs      = seq(0, 0.5, 0.1),
+  type      = "H",
+  top_n     = 5,
+  residuals = TRUE
+)
+```
+
+## Area Under the P-score Curve (AUPC)
+
+The `aupc()` function summarises treatment performance across an entire CIV
+grid by computing the **Area Under the P-score Curve (AUPC)** for each
+treatment. AUPC can be interpreted as the average probability that a treatment
+beats all others over the specified range of CIV values.
+The function takes a `pscore_civs` object as input; set `excel = TRUE` to export results to an Excel file.
+
+### Single Outcome (Efficacy)
+
+```{r}
+#Calculating AUPC for outcome efficacy with a grid of 50 values between 0 and 0.5.
+out_eff <- pscore_civs(
+  x           = list(efficacy),
+  CIVs        = list(seq(0, 0.5, length.out = 50)),
+  correlation = NULL,
+  type        = "H"
+)
+
+aupc(out_eff)
+```
+
+### Single Outcome (Weight Gain)
+
+```{r}
+#Calculating AUPC for outcome weight gain with a grid of 50 values between 0 and 0.5.
+out_wg <- pscore_civs(
+  x           = list(weight_gain),
+  CIVs        = list(seq(-0.5, 0, length.out = 50)),
+  correlation = NULL,
+  type        = "H"
+)
+
+aupc(out_wg)
+```
+
+### Multiple Outcomes (Efficacy and Weight Gain)
+
+```{r}
+#correlation matrix between the two outcomes (the assumed correlation between efficacy and weight gain is −0.5
+cor_mat <- matrix(c( 1.0, -0.5,
+                    -0.5,  1.0),
+                  nrow  = 2,
+                  byrow = TRUE)
+
+out <- pscore_civs(
+  x           = list(efficacy, weight_gain),
+  CIVs        = list(seq(0, 0.5, length.out = 50),
+                     seq(-0.5, 0, length.out = 50)),
+  correlation = cor_mat,
+  type        = c("H", "H")
+)
+
+aupc(out, excel=FALSE) #setting the excel argument to TRUE allows for exporting results to a timestamped Excel file
+```
+
+## Comparing AUPC and P-score Rankings
+
+The `plot_aupc_pscore()` function produces a scatter plot comparing treatment
+rankings derived from **AUPC** and **extended P-scores** at a specific CIV. An
+identity line (y = x) is drawn as a reference, and treatments are labelled
+directly on the plot, making it easy to spot where the two ranking approaches
+agree or diverge.
+
+```{r, fig.width = 9, fig.height = 6, fig.align = "center", out.width = "100%"}
+# Extended P-scores at a single CIV of 0.30
+eff_rank <- pscore_civs(
+  x           = list(efficacy),
+  CIVs        = 0.30,
+  correlation = NULL,
+  type        = "H"
+)
+
+# AUPC over a CIV range of 0.20 to 0.40
+pscore_range <- pscore_civs(
+  x           = list(efficacy),
+  CIVs        = list(seq(0.2, 0.4, 0.1)),
+  correlation = NULL,
+  type        = "H"
+)
+aupc_res <- aupc(pscore_range)
+
+plot_aupc_pscore(
+  aupc         = aupc_res,
+  pscore       = eff_rank,
+  outcome_name = "Efficacy"
+)
+```
+
+## Heatplot of Treatment Rankings
+
+The `pscores_heatplot()` function visualizes treatment rankings across a grid
+of CIV combinations for **exactly two outcomes**. Each facet represents one
+treatment, with the two CIV axes on x and y and ranking shown as a colour
+gradient. This complements the AUPC summary by revealing the specific CIV
+regions where a treatment performs better or worse.
+
+```{r, fig.width = 12, fig.height = 8, fig.align = "center", out.width = "100%"}
+pscores_heatplot(
+  out,
+  title    = "Efficacy & Weight Gain",
+  outcome1 = "Efficacy",
+  outcome2 = "Weight Gain"
+)
+```
+
+> **Note:** `pscores_heatplot()` requires a `pscore_civs` object with exactly
+> two outcomes. The `out` object computed in the previous section is used here
+> directly.
+
+
+## POTH Bubble Plot
+
+The `pscores_pothplot()` function visualizes **Precision of Treatment Hierarchy (POTH)** values across a grid of CIV combinations for exactly two outcomes using a bubble plot. Bubble size reflects POTH magnitude, and the maximum and minimum values are optionally highlighted in distinct colours (blue and pink), revealing the CIV regions where treatment rankings are most or least precise.
+
+```{r, fig.width = 9, fig.height = 7, fig.align = "center", out.width = "100%"}
+g <- pscores_pothplot(
+  x        = out,
+  title    = "POTH Plot",
+  outcome1 = "Efficacy",
+  outcome2 = "Weight Gain"
+)
+
+g
+```
+
+For large grids, use `newgridsize` to downsample to an n × n quantile grid for a cleaner visualization:
+
+```{r, fig.width = 9, fig.height = 7, fig.align = "center", out.width = "100%"}
+g2 <- pscores_pothplot(
+  x           = out,
+  newgridsize = 10,
+  title       = "POTH Plot",
+  outcome1    = "Efficacy",
+  outcome2    = "Weight Gain"
+)
+
+g2
+```
+
+
+```{r session-info}
+sessionInfo()
+```
