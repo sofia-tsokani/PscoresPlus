@@ -202,7 +202,7 @@ plot_pscores <- function(x, CIVs, type, top_n = 5, residuals = TRUE) {
     plot_title <- "Residual P-scores across CIV values"
     plot_subtitle <- paste0(
       "Colored lines: Top ", length(best),
-      " interventions at the first CIV ( " , CIVs[1] ," ). Dashed line: Residual Average (approximately 0)."
+      " interventions at the first CIV ( " , CIVs[1] ," ). \nDashed line: Residual Average (approximately 0)."
     )
   } else {
     y_limits <- c(0, 1)
@@ -212,8 +212,9 @@ plot_pscores <- function(x, CIVs, type, top_n = 5, residuals = TRUE) {
     plot_title <- "P-scores across CIV values"
     plot_subtitle <- paste0(
       "Colored lines: Top ", length(best),
-      " interventions at the first CIV ( " , CIVs[1] ," ). Dashed line: average P-score of highlighted interventions."
+      " interventions at the first CIV (", CIVs[1], "). \nDashed line: average P-score of highlighted interventions."
     )
+
   }
 
   suppressPackageStartupMessages(library(ggplot2))
@@ -246,7 +247,7 @@ plot_pscores <- function(x, CIVs, type, top_n = 5, residuals = TRUE) {
     labs(
       x = "CIV",
       y = y_label,
-      color = paste0(length(best), " Top ranked interventions at CIV = " , CIVs[1] ,"."),
+      color = paste0(length(best), " Top ranked interventions\nat CIV = " , CIVs[1] ,"."),
       title = plot_title,
       subtitle = plot_subtitle
     ) +
