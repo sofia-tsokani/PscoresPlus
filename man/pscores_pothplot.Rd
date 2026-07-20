@@ -10,7 +10,8 @@ pscores_pothplot(
   highlight = TRUE,
   title = "POTH plot",
   outcome1 = "Outcome 1",
-  outcome2 = "Outcome 2"
+  outcome2 = "Outcome 2",
+  clip = TRUE
 )
 }
 \arguments{
@@ -32,6 +33,8 @@ Defaults to \code{"Outcome 1"}.}
 
 \item{outcome2}{Optional character string for the y-axis label.
 Defaults to \code{"Outcome 2"}.}
+
+\item{clip}{Logical. If \code{TRUE} (default), it clips bubbles at the edge of the plot. Otherwise bubbles are allowed to overflow the plot.}
 }
 \value{
 A list containing:

@@ -21,6 +21,8 @@
 #' @param outcome2 Optional character string for the y-axis label.
 #'   Defaults to \code{"Outcome 2"}.
 #'
+#' @param clip Logical. If \code{TRUE} (default), it clips bubbles at the edge of the plot. Otherwise bubbles are allowed to overflow the plot.
+#'
 #' @details
 #' The function requires exactly two CIV dimensions (columns in \code{x$CIVs}).
 #'
@@ -32,6 +34,8 @@
 #' }
 #'
 #' @seealso \code{\link{pscore_civs}}, \code{\link{pscores_heatplot}}
+#'
+#' @import ggplot2
 #'
 #' @export
 #'
@@ -69,7 +73,12 @@
 #' g <- pscores_pothplot(out)
 #' ggplot2::ggsave("pothplot.png", g$plot, width = 8, height = 6)
 #' }
-pscores_pothplot <- function(x, newgridsize = 0, highlight = TRUE, title = "POTH plot",outcome1 = "Outcome 1", outcome2 = "Outcome 2") {
+pscores_pothplot <- function(x,
+                             newgridsize = 0,
+                             highlight = TRUE,
+                             title = "POTH plot",
+                             outcome1 = "Outcome 1",
+                             outcome2 = "Outcome 2", clip = TRUE) {
 
   if(ncol(x$CIVs) != 2) {
 
@@ -97,33 +106,46 @@ pscores_pothplot <- function(x, newgridsize = 0, highlight = TRUE, title = "POTH
       dplyr::mutate(status = dplyr::case_when(
         POTH == max(POTH) ~ "Largest",
         POTH == min(POTH) ~ "Smallest",
-        TRUE              ~ "other"
+        TRUE              ~ "Zother"
       ))
 
   } else {
 
-    plt <- bub %>% mutate(status = "other")
+    plt <- bub %>% mutate(status = "Zother")
 
   }
+
+  largesttag <- paste0("Largest POTH = ", round(max(plt$POTH), digits = 3))
+  smallesttag <- paste0("Smallest POTH = ", round(min(plt$POTH), digits = 3))
+
+
+  # minval <- paste0("Largest = ", round(min(plt$POTH, na.rm = T), digits = 3))
+  # maxval <- paste0("Smallest = ", round(min(plt$POTH, na.rm = T), digits = 3))
 
 
   g <-ggplot(plt, aes(x = !!sym(names(x$CIVs)[1]),
                       y = !!sym(names(x$CIVs)[2]),
-                      size = POTH, col = status, fill = status)) +
-    geom_point(alpha = 0.7, shape = 21) +
+                      size = POTH, fill = status)) +
+    geom_point(alpha = 0.7, shape = 21, col = "black") +
     scale_size(range = c(1, 20)) +
     scale_fill_manual(breaks = c("Largest", "Smallest"),
-                      values = c(Largest = "lightskyblue3", Smallest = "hotpink3", other = "lightyellow")) +
-    scale_color_manual(breaks = c("Largest", "Smallest"),
-                       values = c(Largest = "lightskyblue4", Smallest = "hotpink4", other = "black")) +
-    guides(size = guide_legend(override.aes = list(fill = "lightyellow"), order = 1),
+                      values = c(Largest = "lightskyblue3", Smallest = "hotpink3", Zother = "lightyellow")) +
+    # scale_color_manual(breaks = c("Largest", "Smallest"),
+    #                    values = c(Largest = "lightskyblue4", Smallest = "hotpink4", other = "black")) +
+    # scale_fill_manual(breaks = c(),
+    #                   values = c("lightskyblue3", "hotpink3", Zother = "lightyellow")) +
+    # # scale_color_manual(breaks = c(largesttag, smallesttag),
+    # #                    values = c("lightskyblue4", "hotpink4",  "black")) +
+    guides(size = guide_legend(override.aes = list(fill = c("lightyellow")), order = 1),
            fill = guide_legend(override.aes = list(size = 10),
-                               title = "Useful POTH Values"),
-           colour = guide_legend(title = "Useful POTH Values")) +
-    coord_cartesian(clip = "off") +
+                               title = "")) +
+    coord_cartesian(clip = ifelse(clip, "on", "off")) +
     labs(x = paste0("CIV (", outcome1, ")"),
          y = paste0("CIV (", outcome2, ")"),
-         title = title) +
+         title = title,
+         subtitle = paste0(largesttag, ", ", smallesttag)) +
+    scale_x_continuous(expand = expansion(c(0.15, 0.15))) +
+    scale_y_continuous(expand = expansion(c(0.15, 0.15))) +
     theme_bw()
 
 
