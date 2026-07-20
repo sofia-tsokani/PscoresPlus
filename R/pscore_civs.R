@@ -91,6 +91,8 @@ pscore_civs<- function(x, CIVs, correlation, type, excel = FALSE) {
     stop("CIVs must be a list with the same length as the number of outcomes")
   }
 
+  extended <- (any(unlist(CIVs)!=0) | length(x) > 1)
+
   CIV_mat <- expand.grid(CIVs)
   names(CIV_mat) <- paste0("CIV", seq_along(CIVs))
   pscore_df <- matrix(nrow = nrow(CIV_mat), ncol = length(comm),
@@ -108,7 +110,7 @@ pscore_civs<- function(x, CIVs, correlation, type, excel = FALSE) {
   res <- cbind(pscore_df, CIV_mat) %>%
    pivot_longer(cols = 1:length(comm), names_to = "Treatment", values_to = "Pscore") %>%
     group_by(across(all_of(names(CIV_mat)))) %>%
-   mutate(ranking = rank(-Pscore), poth = poth2(Pscore),
+   mutate(ranking = rank(-Pscore), poth = poth2(Pscore, extended = extended),
            residuals=Pscore-mean(Pscore)) #residuals calculation
 
   # excel export argument, default is FALSE
