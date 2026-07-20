@@ -11,8 +11,8 @@
 #' @param x A list containing a single \code{netmeta} object. If a list of
 #'   multiple outcomes is supplied, the function stops with an error.
 #' @param CIVs A numeric vector of CIV values at which P-scores are evaluated.
-#' @param type A single character string specifying the outcome type:
-#'   \code{"B"} (beneficial) or \code{"H"} (harmful).
+#' @param small.values A character string specifying whether small values represent
+#'   a beneficial \code{"desirable"} or harmful \code{"undesirable"} effect.
 #' @param top_n A positive integer indicating the number of top-ranked
 #'   interventions to highlight. Defaults to \code{5}.
 #' @param residuals Logical. If \code{TRUE}, residual P-scores are plotted by
@@ -47,7 +47,7 @@
 #' plot_pscores(
 #'   list(efficacy),
 #'   CIVs      = seq(0, 0.5, 0.1),
-#'   type      = "H",
+#'   small.values = "desirable",
 #'   top_n     = 5,
 #'   residuals = FALSE
 #' )
@@ -56,16 +56,13 @@
 #' plot_pscores(
 #'   list(efficacy),
 #'   CIVs      = seq(0, 0.5, 0.1),
-#'   type      = "H",
+#'   small.values = "desirable",
 #'   top_n     = 5,
 #'   residuals = TRUE
 #' )
 #' }
-plot_pscores <- function(x, CIVs, type, top_n = 5, residuals = TRUE) {
-  # ... your function code
-}
 
-plot_pscores <- function(x, CIVs, type, top_n = 5, residuals = TRUE) {
+plot_pscores <- function(x, CIVs, small.values, top_n = 5, residuals = TRUE) {
 
   # ---- checks that should stop execution ----
   if (missing(x) || is.null(x)) {
@@ -85,8 +82,8 @@ plot_pscores <- function(x, CIVs, type, top_n = 5, residuals = TRUE) {
     stop("`CIVs` must be a numeric vector of finite values.", call. = FALSE)
   }
 
-  if (missing(type) || length(type) != 1 || !is.character(type)) {
-    stop("`type` must be a single character string 'B' or 'H'.", call. = FALSE)
+  if (missing(small.values) || length(small.values) != 1 || !is.character(small.values)) {
+    stop("`small.values` must be a character string 'desirable' or 'undesirable'.", call. = FALSE)
   }
 
   if (length(top_n) != 1 || !is.numeric(top_n) || !is.finite(top_n) || top_n < 1) {
@@ -139,7 +136,7 @@ plot_pscores <- function(x, CIVs, type, top_n = 5, residuals = TRUE) {
       px$var.outcomes,
       1,
       -CIVs[i],
-      type,
+      ifelse(small.values == "desirable", "H", "B"),
       px$comm
     )
   }

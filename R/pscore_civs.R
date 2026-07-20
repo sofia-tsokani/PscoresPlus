@@ -13,9 +13,8 @@
 #' @param correlation A square numeric correlation matrix of dimension k x k,
 #'   where k is the number of outcomes. Use \code{NULL} or \code{diag(k)} to
 #'   assume independence.
-#' @param type A character vector of length equal to the number of outcomes,
-#'   specifying the outcome type: \code{"H"} for harmful and \code{"B"} for
-#'   beneficial.
+#' @param small.values A character vector of length equal to the number of outcomes,
+#'   specifying whether small values indicate a beneficial ("desirable") or harmful ("undesirable") effect.
 #' @param excel Logical. If \code{TRUE}, exports results to a timestamped
 #'   Excel file in the working directory. Default is \code{FALSE}.
 #'
@@ -38,7 +37,7 @@
 #'   list(efficacy),
 #'   CIVs        = 0.5,
 #'   correlation = NULL,
-#'   type        = "H"
+#'   small.values = "desirable"
 #' )
 #' out_eff
 #'
@@ -49,7 +48,7 @@
 #'   list(weight_gain),
 #'   CIVs        = -0.5,
 #'   correlation = NULL,
-#'   type        = "H"
+#'   small.values= "desirable"
 #' )
 #' out_wg
 #'
@@ -65,7 +64,7 @@
 #'   list(efficacy, weight_gain),
 #'   CIVs        = list(0.5, -0.5),
 #'   correlation = cor_mat,
-#'   type        = c("H", "H")
+#'   small.values        = c("desirable", "desirable")
 #' )
 #' out1
 #'
@@ -74,13 +73,13 @@
 #'   list(efficacy, weight_gain),
 #'   CIVs        = list(0.5, c(-0.3, -0.5)),
 #'   correlation = cor_mat,
-#'   type        = c("H", "H"),
+#'   small.values= c("desirable", "desirable"),
 #'   excel       = TRUE
 #' )
 #' out2
 #' }
 
-pscore_civs<- function(x, CIVs, correlation, type, excel = FALSE) {
+pscore_civs<- function(x, CIVs, correlation, small.values, excel = FALSE) {
 
   prepare_data <- prep(x)
   outcomes <- prepare_data$outcomes
@@ -89,6 +88,12 @@ pscore_civs<- function(x, CIVs, correlation, type, excel = FALSE) {
 
   if (length(CIVs) != dim(outcomes)[3]) {
     stop("CIVs must be a list with the same length as the number of outcomes")
+  }
+
+  if(!all(small.values %in% c("desirable", "undesirable"))) {
+
+    stop("Valid values of small.values are desirable and undesirable.")
+
   }
 
   extended <- (any(unlist(CIVs)!=0) | length(x) > 1)
@@ -103,7 +108,7 @@ pscore_civs<- function(x, CIVs, correlation, type, excel = FALSE) {
                              var.outcomes = var.outcomes,
                              correlation = correlation,
                              beta = as.numeric(-CIV_mat[i,]),
-                             type = type,
+                             type = ifelse(small.values == "desirable", "H", "B"),
                              label = as.vector(comm))
   }
 

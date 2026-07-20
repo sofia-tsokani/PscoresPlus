@@ -4,7 +4,7 @@
 \alias{pscore_civs}
 \title{Compute extended P-scores across CIV combinations}
 \usage{
-pscore_civs(x, CIVs, correlation, type, excel = FALSE)
+pscore_civs(x, CIVs, correlation, small.values, excel = FALSE)
 }
 \arguments{
 \item{x}{A list of \code{netmeta} objects, one per outcome.}
@@ -16,9 +16,8 @@ one per outcome. Its length must equal the number of outcomes.}
 where k is the number of outcomes. Use \code{NULL} or \code{diag(k)} to
 assume independence.}
 
-\item{type}{A character vector of length equal to the number of outcomes,
-specifying the outcome type: \code{"H"} for harmful and \code{"B"} for
-beneficial.}
+\item{small.values}{A character vector of length equal to the number of outcomes,
+specifying whether small values indicate a beneficial ("desirable") or harmful ("undesirable") effect.}
 
 \item{excel}{Logical. If \code{TRUE}, exports results to a timestamped
 Excel file in the working directory. Default is \code{FALSE}.}
@@ -42,7 +41,7 @@ out_eff <- pscore_civs(
   list(efficacy),
   CIVs        = 0.5,
   correlation = NULL,
-  type        = "H"
+  small.values = "desirable"
 )
 out_eff
 
@@ -53,7 +52,7 @@ out_wg <- pscore_civs(
   list(weight_gain),
   CIVs        = -0.5,
   correlation = NULL,
-  type        = "H"
+  small.values= "desirable"
 )
 out_wg
 
@@ -69,7 +68,7 @@ out1 <- pscore_civs(
   list(efficacy, weight_gain),
   CIVs        = list(0.5, -0.5),
   correlation = cor_mat,
-  type        = c("H", "H")
+  small.values        = c("desirable", "desirable")
 )
 out1
 
@@ -78,7 +77,7 @@ out2 <- pscore_civs(
   list(efficacy, weight_gain),
   CIVs        = list(0.5, c(-0.3, -0.5)),
   correlation = cor_mat,
-  type        = c("H", "H"),
+  small.values= c("desirable", "desirable"),
   excel       = TRUE
 )
 out2

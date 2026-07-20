@@ -38,7 +38,7 @@ out_eff <- pscore_civs(
   list(efficacy),
   CIVs        = list(seq(0, 0.5, length.out = 50)),
   correlation = NULL,
-  type        = "H"
+  small.values = "desirable"
 )
 
 obj <- aupc(out_eff)

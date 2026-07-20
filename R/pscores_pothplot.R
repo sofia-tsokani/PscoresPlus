@@ -51,7 +51,7 @@
 #'   CIVs        = list(seq(0, 0.5, length.out = 50),
 #'                      seq(-0.5, 0, length.out = 50)),
 #'   correlation = cor_mat,
-#'   type        = c("H", "H")
+#'   small.values        = c("desirable", "desirable")
 #' )
 #'
 #' # Full grid with highlighting

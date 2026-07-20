@@ -31,7 +31,7 @@
 #'   list(efficacy),
 #'   CIVs        = 0.30,
 #'   correlation = NULL,
-#'   type        = "H"
+#'   small.values = "desirable"
 #' )
 #'
 #' # APC over a CIV range of 0.20 to 0.40
@@ -39,7 +39,7 @@
 #'   list(efficacy),
 #'   CIVs        = list(seq(0.2, 0.4, 0.1)),
 #'   correlation = NULL,
-#'   type        = "H"
+#'   small.values = "desirable"
 #' )
 #' apc_res <- apc(pscore_range)
 #'

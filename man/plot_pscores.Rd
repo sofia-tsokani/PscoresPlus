@@ -4,7 +4,7 @@
 \alias{plot_pscores}
 \title{Plot P-scores or residual P-scores across CIV values for a single outcome}
 \usage{
-plot_pscores(x, CIVs, type, top_n = 5, residuals = TRUE)
+plot_pscores(x, CIVs, small.values, top_n = 5, residuals = TRUE)
 }
 \arguments{
 \item{x}{A list containing a single \code{netmeta} object. If a list of
@@ -12,8 +12,8 @@ multiple outcomes is supplied, the function stops with an error.}
 
 \item{CIVs}{A numeric vector of CIV values at which P-scores are evaluated.}
 
-\item{type}{A single character string specifying the outcome type:
-\code{"B"} (beneficial) or \code{"H"} (harmful).}
+\item{small.values}{A character string specifying whether small values represent
+a beneficial \code{"desirable"} or harmful \code{"undesirable"} effect.}
 
 \item{top_n}{A positive integer indicating the number of top-ranked
 interventions to highlight. Defaults to \code{5}.}
@@ -55,7 +55,7 @@ data("efficacy")
 plot_pscores(
   list(efficacy),
   CIVs      = seq(0, 0.5, 0.1),
-  type      = "H",
+  small.values = "desirable",
   top_n     = 5,
   residuals = FALSE
 )
@@ -64,7 +64,7 @@ plot_pscores(
 plot_pscores(
   list(efficacy),
   CIVs      = seq(0, 0.5, 0.1),
-  type      = "H",
+  small.values = "desirable",
   top_n     = 5,
   residuals = TRUE
 )

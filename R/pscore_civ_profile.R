@@ -43,8 +43,6 @@ pscore_civ_profile  <- function(x, beta, type, top_n = 5){
   col_map <- setNames(rep("black", length(prep(x)$comm)), prep(x)$comm)
   col_map[best] <- colr_b
 
-  suppressPackageStartupMessages(library(ggplot2))
-
   gg <- ggplot(df_long, aes(x = beta, y = pscore, group = interv, color = interv)) +
     geom_line(data = subset(df_long, !is_best), linewidth = 0.5, alpha = 0.65) +
     geom_line(data = subset(df_long,  is_best), linewidth = 1.0) +
