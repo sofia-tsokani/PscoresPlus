@@ -2,9 +2,9 @@
 % Please edit documentation in R/plot_pscores.R
 \name{plot_pscores}
 \alias{plot_pscores}
-\title{Plot P-scores or residual P-scores across CIV values for a single outcome}
+\title{Plot P-scores or P-score deviances across CIV values for a single outcome}
 \usage{
-plot_pscores(x, CIVs, small.values, top_n = 5, residuals = TRUE)
+plot_pscores(x, CIVs, small.values, top_n = 5, deviances = TRUE)
 }
 \arguments{
 \item{x}{A list containing a single \code{netmeta} object. If a list of
@@ -18,31 +18,31 @@ a beneficial \code{"desirable"} or harmful \code{"undesirable"} effect.}
 \item{top_n}{A positive integer indicating the number of top-ranked
 interventions to highlight. Defaults to \code{5}.}
 
-\item{residuals}{Logical. If \code{TRUE}, residual P-scores are plotted by
+\item{deviances}{Logical. If \code{TRUE}, deviance P-scores are plotted by
 subtracting the row mean across interventions at each CIV value. If
 \code{FALSE}, raw P-scores are plotted. Defaults to \code{TRUE}.}
 }
 \value{
-A \code{ggplot2} object depicting extended P-scores or residual
-P-scores across the specified CIV values.
+A \code{ggplot2} object depicting extended P-scores or
+P-score deviances across the specified CIV values.
 }
 \description{
-Plots the extended P-scores or residual P-scores across a range of
+Plots the extended P-scores or P-score deviances across a range of
 clinically important values (CIV) for a single outcome. The top-ranked
 interventions are highlighted with distinct colours. A dashed reference
 line is added to aid interpretation; for extended P-scores it corresponds
-to the average P-score, while for residual P-scores it is approximately
+to the average P-score, while for P-scores deviances it is approximately
 zero.
 }
 \details{
 This function is intended for single-outcome objects only.
 
-When \code{residuals = TRUE}, each treatment's P-score is centred by
+When \code{deviances = TRUE}, each treatment's P-score is centred by
 subtracting the row mean across all treatments at each CIV value. This
 highlights relative rather than absolute performance, and the dashed mean
 line is approximately zero.
 
-When \code{residuals = FALSE}, raw P-scores are plotted. In both cases,
+When \code{deviances = FALSE}, raw P-scores are plotted. In both cases,
 the top \code{top_n} interventions are identified at the first CIV value
 and highlighted in colour, while the remaining interventions are shown
 in black.
@@ -57,16 +57,16 @@ plot_pscores(
   CIVs      = seq(0, 0.5, 0.1),
   small.values = "desirable",
   top_n     = 5,
-  residuals = FALSE
+  deviances = FALSE
 )
 
-# Residual P-scores
+# P-score deviances
 plot_pscores(
   list(efficacy),
   CIVs      = seq(0, 0.5, 0.1),
   small.values = "desirable",
   top_n     = 5,
-  residuals = TRUE
+  deviances = TRUE
 )
 }
 }

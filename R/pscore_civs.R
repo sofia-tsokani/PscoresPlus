@@ -4,7 +4,7 @@
 #' Computes extended P-scores for all treatments across combinations of
 #' clinically important values (CIVs) for one or more outcomes. For each
 #' CIV combination, treatment ranking, Precision of Treatment Hierarchy
-#' (POTH) and residual Pscores are also computed. Optionally, results can be exported to an
+#' (POTH) and P-score deviances are also computed. Optionally, results can be exported to an
 #' Excel file.
 #'
 #' @param x A list of \code{netmeta} objects, one per outcome.
@@ -116,7 +116,7 @@ pscore_civs<- function(x, CIVs, correlation, small.values, excel = FALSE) {
    pivot_longer(cols = 1:length(comm), names_to = "Treatment", values_to = "Pscore") %>%
     group_by(across(all_of(names(CIV_mat)))) %>%
    mutate(ranking = rank(-Pscore), poth = poth2(Pscore, extended = extended),
-           residuals=Pscore-mean(Pscore)) #residuals calculation
+           deviance=Pscore-mean(Pscore)) #deviances calculation
 
   # excel export argument, default is FALSE
   if (isTRUE(excel)) {

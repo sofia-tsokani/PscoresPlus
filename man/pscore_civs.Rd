@@ -29,7 +29,7 @@ An object of class \code{pscore_civs}
 Computes extended P-scores for all treatments across combinations of
 clinically important values (CIVs) for one or more outcomes. For each
 CIV combination, treatment ranking, Precision of Treatment Hierarchy
-(POTH) and residual Pscores are also computed. Optionally, results can be exported to an
+(POTH) and P-score deviances are also computed. Optionally, results can be exported to an
 Excel file.
 }
 \examples{
