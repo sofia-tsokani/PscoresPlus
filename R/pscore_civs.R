@@ -112,11 +112,13 @@ pscore_civs<- function(x, CIVs, correlation, small.values, excel = FALSE) {
                              label = as.vector(comm))
   }
 
+
   res <- cbind(pscore_df, CIV_mat) %>%
-   pivot_longer(cols = 1:length(comm), names_to = "Treatment", values_to = "Pscore") %>%
+    pivot_longer(cols = 1:length(comm), names_to = "Treatment", values_to = "Pscore") %>%
     group_by(across(all_of(names(CIV_mat)))) %>%
-   mutate(ranking = rank(-Pscore), poth = poth2(Pscore, extended = extended),
+    mutate(ranking = rank(-Pscore), poth = poth2(Pscore, extended = !(mean(Pscore) == 0.5)),
            deviance=Pscore-mean(Pscore)) #deviances calculation
+
 
   # excel export argument, default is FALSE
   if (isTRUE(excel)) {
