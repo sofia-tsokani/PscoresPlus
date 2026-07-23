@@ -23,7 +23,8 @@ original grid from \code{x}. A positive integer \code{n} creates an
 \code{n x n}  grid.}
 
 \item{highlight}{Logical. If \code{TRUE} (default), highlights the maximum
-(blue) and minimum (pink) POTH values with distinct colours.}
+(blue) and minimum (pink) POTH values with distinct colours. Otherwise, uses
+a colour scale to show POTH magnitude.}
 
 \item{title}{Optional character string for the plot title. Defaults to
 \code{"POTH plot"}.}
