@@ -70,13 +70,15 @@ apc <- function(x,excel=FALSE) {
 
   ranking <- rank(-apc)
 
-  res<-(data.frame(APC = apc, Treatment = labels, ranking = ranking)) # average probability that it beats all other treatments, averaged over the CIVs
+  res<-(data.frame(Treatment = labels, APC = apc, ranking = ranking)) # average probability that it beats all other treatments, averaged over the CIVs
 
   if (isTRUE(excel)) {
     filename <- paste0("apc_", format(Sys.Date(), "%Y%m%d"), ".xlsx")
     writexl::write_xlsx(list("APC Results" = res), path = filename)
     message("Results saved to: ", filename)
   }
+
+  row.names(res) <- NULL
 
   return(res)
 }
