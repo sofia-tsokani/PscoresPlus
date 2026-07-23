@@ -197,20 +197,14 @@ plot_pscores <- function(x, CIVs, small.values, top_n = 5, deviances = TRUE) {
     y_breaks_minor <- pretty(y_limits, 20)
     y_label <- "P-score Deviance"
     plot_title <- "P-score Deviance across CIV values"
-    plot_subtitle <- paste0(
-      "Colored lines: Top ", length(best),
-      " interventions at the first CIV ( " , CIVs[1] ," ). \nDashed line: Deviance Average (approximately 0)."
-    )
+    plot_subtitle <- "Dashed line: Average of residual P-scores (approximately 0)"
   } else {
     y_limits <- c(0, 1)
     y_breaks_major <- seq(0, 1, by = 0.1)
     y_breaks_minor <- seq(0, 1, by = 0.05)
     y_label <- "P-score"
     plot_title <- "P-scores across CIV values"
-    plot_subtitle <- paste0(
-      "Colored lines: Top ", length(best),
-      " interventions at the first CIV (", CIVs[1], "). \nDashed line: average P-score of highlighted interventions."
-    )
+    plot_subtitle <- "Dashed line: Average P-score of highlighted interventions"
 
   }
 
