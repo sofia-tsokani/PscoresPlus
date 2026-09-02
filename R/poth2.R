@@ -41,6 +41,19 @@ ssqbound <- function(n) {
 
 varfunc <- function(m,n) {
 
+  # if(m>(n/2)) {
+  #
+  #   print(paste0("m = ", m))
+  #
+  #   oldmean <- (sum((m:n)-1))/(n-1)/n
+  #   olddist <- (m-1)/(n-1)-oldmean
+  #   newdist <- (sum(((m+1):n)-1))/(n-1)/n
+  #
+  #   print(paste0("Old distance: ", olddist, " New distance: ", newdist))
+  #
+  # }
+
+
   num <- n*(n-1)*(2*n-1)/6 - m*(m-1)*(2*m-1)/6 - (n^2-n-m^2+m)^2/n/4
 
   return(num/n/(n-1)^2)

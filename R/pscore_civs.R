@@ -28,6 +28,8 @@
 #'
 #' @export
 #'
+#' @import dplyr
+#'
 #' @examples
 #' \dontrun{
 #' # Efficacy
@@ -96,12 +98,24 @@ pscore_civs<- function(x, CIVs, correlation, small.values, excel = FALSE) {
 
   }
 
-  extended <- (any(unlist(CIVs)!=0) | length(x) > 1)
-
   CIV_mat <- expand.grid(CIVs)
   names(CIV_mat) <- paste0("CIV", seq_along(CIVs))
   pscore_df <- matrix(nrow = nrow(CIV_mat), ncol = length(comm),
                       dimnames = list(list(), comm))
+
+  # use upper bound for extended P-scores when there are more than 1 outcome or
+  # CIV used (other than 0)
+  if(ncol(CIV_mat) > 1) {
+
+    extended <- rep(TRUE, nrow(CIV_mat))
+
+  } else {
+
+    extended <- apply(CIV_mat, 1, function(x) any(x !=0))
+
+  }
+
+
 
   for (i in 1:nrow(CIV_mat)) {
     pscore_df[i,] <- pscores(outcomes = outcomes,
@@ -113,11 +127,12 @@ pscore_civs<- function(x, CIVs, correlation, small.values, excel = FALSE) {
   }
 
 
-  res <- cbind(pscore_df, CIV_mat) %>%
+  res <- cbind(pscore_df, CIV_mat, extended) %>%
     pivot_longer(cols = 1:length(comm), names_to = "Treatment", values_to = "Pscore") %>%
     group_by(across(all_of(names(CIV_mat)))) %>%
-    mutate(ranking = rank(-Pscore), poth = poth2(Pscore, extended = !(mean(Pscore) == 0.5)),
-           deviance=Pscore-mean(Pscore)) #deviances calculation
+    mutate(ranking = rank(-Pscore), poth = poth2(Pscore, extended = unique(extended)),
+           deviance=Pscore-mean(Pscore)) %>% #deviances calculation
+    dplyr::select(-c(extended))
 
 
   # excel export argument, default is FALSE
