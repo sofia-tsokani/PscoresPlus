@@ -173,7 +173,7 @@ plot_pscores <- function(x, CIVs, small.values, top_n = 5, deviances = TRUE) {
   if (deviances) {
     df_mean <- aggregate(pscore ~ CIVs, data = df_long, FUN = mean)
   } else {
-    df_mean <- aggregate(pscore ~ CIVs, data = subset(df_long, is_best), FUN = mean)
+    df_mean <- aggregate(pscore ~ CIVs, data = df_long, FUN = mean)
   }
 
   # ---- colors ----
@@ -204,11 +204,9 @@ plot_pscores <- function(x, CIVs, small.values, top_n = 5, deviances = TRUE) {
     y_breaks_minor <- seq(0, 1, by = 0.05)
     y_label <- "P-score"
     plot_title <- "P-scores across CIV values"
-    plot_subtitle <- "Dashed line: Average P-score of highlighted interventions"
+    plot_subtitle <- "Dashed line: Average P-score"
 
   }
-
-  suppressPackageStartupMessages(library(ggplot2))
 
   gg <- ggplot(df_long, aes(x = CIVs, y = pscore, group = interv, color = interv)) +
     geom_line(data = subset(df_long, !is_best), linewidth = 0.5, alpha = 0.65) +
