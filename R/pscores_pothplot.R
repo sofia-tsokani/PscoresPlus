@@ -13,13 +13,16 @@
 #'   original grid from \code{x}. A positive integer \code{n} creates an
 #'   \code{n x n}  grid.
 #' @param highlight Logical. If \code{TRUE} (default), highlights the maximum
-#'   (blue) and minimum (pink) POTH values with distinct colours.
+#'   (blue) and minimum (pink) POTH values with distinct colours. Otherwise, uses
+#'   a colour scale to show POTH magnitude.
 #' @param title Optional character string for the plot title. Defaults to
 #'   \code{"POTH plot"}.
 #' @param outcome1 Optional character string for the x-axis label.
 #'   Defaults to \code{"Outcome 1"}.
 #' @param outcome2 Optional character string for the y-axis label.
 #'   Defaults to \code{"Outcome 2"}.
+#'
+#' @param clip Logical. If \code{TRUE} (default), it clips bubbles at the edge of the plot. Otherwise bubbles are allowed to overflow the plot.
 #'
 #' @details
 #' The function requires exactly two CIV dimensions (columns in \code{x$CIVs}).
@@ -32,6 +35,8 @@
 #' }
 #'
 #' @seealso \code{\link{pscore_civs}}, \code{\link{pscores_heatplot}}
+#'
+#' @import ggplot2
 #'
 #' @export
 #'
@@ -47,7 +52,7 @@
 #'   CIVs        = list(seq(0, 0.5, length.out = 50),
 #'                      seq(-0.5, 0, length.out = 50)),
 #'   correlation = cor_mat,
-#'   type        = c("H", "H")
+#'   small.values        = c("desirable", "desirable")
 #' )
 #'
 #' # Full grid with highlighting
@@ -69,7 +74,12 @@
 #' g <- pscores_pothplot(out)
 #' ggplot2::ggsave("pothplot.png", g$plot, width = 8, height = 6)
 #' }
-pscores_pothplot <- function(x, newgridsize = 0, highlight = TRUE, title = "POTH plot",outcome1 = "Outcome 1", outcome2 = "Outcome 2") {
+pscores_pothplot <- function(x,
+                             newgridsize = 0,
+                             highlight = TRUE,
+                             title = "POTH plot",
+                             outcome1 = "Outcome 1",
+                             outcome2 = "Outcome 2", clip = TRUE) {
 
   if(ncol(x$CIVs) != 2) {
 
@@ -97,35 +107,70 @@ pscores_pothplot <- function(x, newgridsize = 0, highlight = TRUE, title = "POTH
       dplyr::mutate(status = dplyr::case_when(
         POTH == max(POTH) ~ "Largest",
         POTH == min(POTH) ~ "Smallest",
-        TRUE              ~ "other"
+        TRUE              ~ "Zother"
       ))
+
+    largesttag <- paste0("Largest POTH = ", round(max(plt$POTH), digits = 3))
+    smallesttag <- paste0("Smallest POTH = ", round(min(plt$POTH), digits = 3))
+
+    g <-ggplot(plt, aes(x = !!sym(names(x$CIVs)[1]),
+                        y = !!sym(names(x$CIVs)[2]),
+                        size = POTH, col = status, fill = status)) +
+      geom_point(alpha = 0.7, shape = 21) +
+      scale_size(range = c(1, 20)) +
+      scale_fill_manual(breaks = c("Largest", "Smallest"),
+                        values = c(Largest = "lightskyblue3", Smallest = "hotpink3", Zother = "lightyellow")) +
+      scale_color_manual(breaks = c("Largest", "Smallest"),
+                         values = c(Largest = "lightskyblue4", Smallest = "hotpink4", Zother = "black")) +
+      guides(size = guide_legend(override.aes = list(fill = "lightyellow"), order = 1),
+             fill = guide_legend(override.aes = list(size = 10),
+                                 title = "Useful POTH Values"),
+             colour = guide_legend(title = "Useful POTH Values")) +
+      coord_cartesian(clip = ifelse(clip, "on", "off")) +
+      scale_x_continuous(expand = expansion(c(0.15, 0.15))) +
+      scale_y_continuous(expand = expansion(c(0.15, 0.15))) +
+      labs(x = paste0("CIV (", outcome1, ")"),
+           y = paste0("CIV (", outcome2, ")"),
+           title = title,
+           subtitle = paste0(largesttag, ", ", smallesttag)) +
+      theme_bw()
 
   } else {
 
-    plt <- bub %>% mutate(status = "other")
+    plt <- dplyr::ungroup(bub)
+
+    largesttag <- paste0("Largest POTH = ", round(max(plt$POTH), digits = 3))
+    smallesttag <- paste0("Smallest POTH = ", round(min(plt$POTH), digits = 3))
+
+    scale_vals <- c(min(plt$POTH),
+                    plt$POTH[which.min(abs(mean(c(max(plt$POTH), min(plt$POTH))) - plt$POTH))],
+                    max(plt$POTH))
+
+    pl <- mean(plt$POTH< scale_vals[2])
+
+    g <-ggplot(plt, aes(x = !!sym(names(x$CIVs)[1]),
+                        y = !!sym(names(x$CIVs)[2]),
+                        size = POTH, fill = POTH, color = POTH)) +
+      geom_point(alpha = 0.7, shape = 21) +
+      scale_size_continuous(range = c(2, 20),
+                            breaks = scale_vals,
+                            label = function(x) sprintf("%.2f", x)) +
+      scale_fill_viridis_c(option = "turbo", guide = "none") +
+      scale_color_viridis_c(option = "turbo", guide = "none") +
+      guides(size = guide_legend(override.aes = list(fill = viridisLite::turbo(20)[c(1, quantile(1:20, probs = pl), 20)],
+                                                     color = viridisLite::turbo(20)[c(1, quantile(1:20, probs = pl), 20)],
+                                                     alpha = 0.7),
+                                 order = 1)) +
+      coord_cartesian(clip = ifelse(clip, "on", "off")) +
+      labs(x = paste0("CIV (", outcome1, ")"),
+           y = paste0("CIV (", outcome2, ")"),
+           title = title,
+           size = "POTH\n(min, midpoint, max)") +
+      scale_x_continuous(expand = expansion(c(0.15, 0.15))) +
+      scale_y_continuous(expand = expansion(c(0.15, 0.15))) +
+      theme_bw()
 
   }
-
-
-  g <-ggplot(plt, aes(x = !!sym(names(x$CIVs)[1]),
-                      y = !!sym(names(x$CIVs)[2]),
-                      size = POTH, col = status, fill = status)) +
-    geom_point(alpha = 0.7, shape = 21) +
-    scale_size(range = c(1, 20)) +
-    scale_fill_manual(breaks = c("Largest", "Smallest"),
-                      values = c(Largest = "lightskyblue3", Smallest = "hotpink3", other = "lightyellow")) +
-    scale_color_manual(breaks = c("Largest", "Smallest"),
-                       values = c(Largest = "lightskyblue4", Smallest = "hotpink4", other = "black")) +
-    guides(size = guide_legend(override.aes = list(fill = "lightyellow"), order = 1),
-           fill = guide_legend(override.aes = list(size = 10),
-                               title = "Useful POTH Values"),
-           colour = guide_legend(title = "Useful POTH Values")) +
-    coord_cartesian(clip = "off") +
-    labs(x = paste0("CIV (", outcome1, ")"),
-         y = paste0("CIV (", outcome2, ")"),
-         title = title) +
-    theme_bw()
-
 
   print(g)
 

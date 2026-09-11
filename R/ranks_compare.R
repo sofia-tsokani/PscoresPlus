@@ -1,0 +1,106 @@
+#' Compare treatment rankings using different methods
+#'
+#' @description
+#' Creates a scatter plot comparing treatment rankings from APC and/or P-score
+#' analyses. Only treatments common to both inputs are shown.
+#'
+#' @param obj.x A \code{pscore_civs} object with only one CIV setting, a \code{apc()} object, or a data.frame
+#'        containing columns "Treatment" and "ranking" with one row per treatment. Will be plotted on the x-axis.
+#' @param obj.y A \code{pscore_civs} object with only one CIV setting, a \code{apc()} object, or a data.frame
+#'        containing columns "Treatment" and "ranking" with one row per treatment. Will be plotted on the y-axis.
+#' @param name.x An optional string to describe the method used to create ranks in obj.x.
+#' @param name.y An optional string to describe the method used to create ranks in obj.y.
+#' @param plot.title Optional character string for the plot title, depicting
+#'   the outcome name. Defaults to \code{"Comparison of Ranks"}.
+#'
+#' @details
+#' The plot depicts treatment rankings according to APC and/or P-scores, draws
+#' the identity line y = x, and labels each treatment directly on the plot.
+#' In brief, it is a scatterplot of treatment ranks using two different methods
+#' of creating the hierarchy.
+#'
+#' @return A \code{ggplot2} object showing ranks from obj.x on the x-axis and
+#'   ranks from obj.y on the y-axis.
+#'
+#' @seealso \code{\link{apc}}, \code{\link{pscore_civs}}
+#'
+#' @export
+#'
+#' @import ggplot2
+#'
+#' @examples
+#' \dontrun{
+#' data("efficacy")
+#'
+#' # Extended P-scores at a single CIV of 0.30
+#' eff_rank <- pscore_civs(
+#'   list(efficacy),
+#'   CIVs        = 0.30,
+#'   correlation = NULL,
+#'   small.values = "desirable"
+#' )
+#'
+#' # APC over a CIV range of 0.20 to 0.40
+#' pscore_range <- pscore_civs(
+#'   list(efficacy),
+#'   CIVs        = list(seq(0.2, 0.4, 0.1)),
+#'   correlation = NULL,
+#'   small.values = "desirable"
+#' )
+#' apc_res <- apc(pscore_range)
+#'
+#' ranks_scatterplot(apc_res, eff_rank, plot.title = "Efficacy")
+#' }
+
+ranks_scatterplot <- function(obj.x, obj.y,
+                            name.x = "Method 1",
+                            name.y = "Method 2",
+                                plot.title="Comparison of Ranks") {
+
+
+  # Process things
+  if(is.null(obj.x$Treatment)|is.null(obj.x$ranking)) {
+
+    obj.x <- obj.x$all
+
+    if(is.null(obj.x$Treatment)|is.null(obj.x$ranking)) {
+
+      stop("obj.x did not contain necessary information")
+
+    }
+
+  }
+
+  if(is.null(obj.y$Treatment)|is.null(obj.y$ranking)) {
+
+    obj.y <- obj.y$all
+
+    if(is.null(obj.y$Treatment)|is.null(obj.y$ranking)) {
+
+      stop("obj.y did not contain necessary information")
+
+    }
+
+  }
+
+  master <- merge(
+    obj.x[, c("Treatment", "ranking")],
+    obj.y[, c("Treatment", "ranking")],
+    by = "Treatment",
+    suffixes = c(".x", ".y")
+  )
+
+  ggplot(master, aes(x = ranking.x, y = ranking.y)) +
+    geom_abline(slope = 1, intercept = 0) +
+    geom_label(
+      aes(label = Treatment),
+      fill = "cornsilk",
+      size = 5
+    ) +
+    labs(x = name.x, y = name.y,title=plot.title) +
+    theme_bw() +
+    theme(
+      axis.title = element_text(size = 12),
+      axis.text = element_text(size = 12)
+)
+}

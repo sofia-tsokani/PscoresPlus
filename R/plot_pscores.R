@@ -1,39 +1,39 @@
-#' Plot P-scores or residual P-scores across CIV values for a single outcome
+#' Plot P-scores or P-score deviances across CIV values for a single outcome
 #'
 #' @description
-#' Plots the extended P-scores or residual P-scores across a range of
+#' Plots the extended P-scores or P-score deviances across a range of
 #' clinically important values (CIV) for a single outcome. The top-ranked
 #' interventions are highlighted with distinct colours. A dashed reference
 #' line is added to aid interpretation; for extended P-scores it corresponds
-#' to the average P-score, while for residual P-scores it is approximately
+#' to the average P-score, while for P-scores deviances it is approximately
 #' zero.
 #'
 #' @param x A list containing a single \code{netmeta} object. If a list of
 #'   multiple outcomes is supplied, the function stops with an error.
 #' @param CIVs A numeric vector of CIV values at which P-scores are evaluated.
-#' @param type A single character string specifying the outcome type:
-#'   \code{"B"} (beneficial) or \code{"H"} (harmful).
+#' @param small.values A character string specifying whether small values represent
+#'   a beneficial \code{"desirable"} or harmful \code{"undesirable"} effect.
 #' @param top_n A positive integer indicating the number of top-ranked
 #'   interventions to highlight. Defaults to \code{5}.
-#' @param residuals Logical. If \code{TRUE}, residual P-scores are plotted by
+#' @param deviances Logical. If \code{TRUE}, deviance P-scores are plotted by
 #'   subtracting the row mean across interventions at each CIV value. If
 #'   \code{FALSE}, raw P-scores are plotted. Defaults to \code{TRUE}.
 #'
 #' @details
 #' This function is intended for single-outcome objects only.
 #'
-#' When \code{residuals = TRUE}, each treatment's P-score is centred by
+#' When \code{deviances = TRUE}, each treatment's P-score is centred by
 #' subtracting the row mean across all treatments at each CIV value. This
 #' highlights relative rather than absolute performance, and the dashed mean
 #' line is approximately zero.
 #'
-#' When \code{residuals = FALSE}, raw P-scores are plotted. In both cases,
+#' When \code{deviances = FALSE}, raw P-scores are plotted. In both cases,
 #' the top \code{top_n} interventions are identified at the first CIV value
 #' and highlighted in colour, while the remaining interventions are shown
 #' in black.
 #'
-#' @return A \code{ggplot2} object depicting extended P-scores or residual
-#'   P-scores across the specified CIV values.
+#' @return A \code{ggplot2} object depicting extended P-scores or
+#'   P-score deviances across the specified CIV values.
 #'
 #' @seealso \code{\link{pscore_civs}}, \code{\link{aupc}}
 #'
@@ -47,25 +47,22 @@
 #' plot_pscores(
 #'   list(efficacy),
 #'   CIVs      = seq(0, 0.5, 0.1),
-#'   type      = "H",
+#'   small.values = "desirable",
 #'   top_n     = 5,
-#'   residuals = FALSE
+#'   deviances = FALSE
 #' )
 #'
-#' # Residual P-scores
+#' # P-score deviances
 #' plot_pscores(
 #'   list(efficacy),
 #'   CIVs      = seq(0, 0.5, 0.1),
-#'   type      = "H",
+#'   small.values = "desirable",
 #'   top_n     = 5,
-#'   residuals = TRUE
+#'   deviances = TRUE
 #' )
 #' }
-plot_pscores <- function(x, CIVs, type, top_n = 5, residuals = TRUE) {
-  # ... your function code
-}
 
-plot_pscores <- function(x, CIVs, type, top_n = 5, residuals = TRUE) {
+plot_pscores <- function(x, CIVs, small.values, top_n = 5, deviances = TRUE) {
 
   # ---- checks that should stop execution ----
   if (missing(x) || is.null(x)) {
@@ -85,8 +82,8 @@ plot_pscores <- function(x, CIVs, type, top_n = 5, residuals = TRUE) {
     stop("`CIVs` must be a numeric vector of finite values.", call. = FALSE)
   }
 
-  if (missing(type) || length(type) != 1 || !is.character(type)) {
-    stop("`type` must be a single character string 'B' or 'H'.", call. = FALSE)
+  if (missing(small.values) || length(small.values) != 1 || !is.character(small.values)) {
+    stop("`small.values` must be a character string 'desirable' or 'undesirable'.", call. = FALSE)
   }
 
   if (length(top_n) != 1 || !is.numeric(top_n) || !is.finite(top_n) || top_n < 1) {
@@ -139,13 +136,13 @@ plot_pscores <- function(x, CIVs, type, top_n = 5, residuals = TRUE) {
       px$var.outcomes,
       1,
       -CIVs[i],
-      type,
+      ifelse(small.values == "desirable", "H", "B"),
       px$comm
     )
   }
 
-  # ---- residuals if requested ----
-  if (residuals) {
+  # ---- deviances if requested ----
+  if (deviances) {
     row_means <- rowMeans(pscores_applied)
     pscores_applied <- pscores_applied - row_means
   }
@@ -173,10 +170,10 @@ plot_pscores <- function(x, CIVs, type, top_n = 5, residuals = TRUE) {
   df_long$is_best <- df_long$interv %in% best
 
   # ---- mean line ----
-  if (residuals) {
+  if (deviances) {
     df_mean <- aggregate(pscore ~ CIVs, data = df_long, FUN = mean)
   } else {
-    df_mean <- aggregate(pscore ~ CIVs, data = subset(df_long, is_best), FUN = mean)
+    df_mean <- aggregate(pscore ~ CIVs, data = df_long, FUN = mean)
   }
 
   # ---- colors ----
@@ -191,33 +188,25 @@ plot_pscores <- function(x, CIVs, type, top_n = 5, residuals = TRUE) {
   col_map[best] <- colr_b
 
   # ---- y scale ----
-  if (residuals) {
+  if (deviances) {
     y_limits <- range(df_long$pscore, na.rm = TRUE)
     if (diff(y_limits) == 0) {
       y_limits <- y_limits + c(-0.05, 0.05)
     }
     y_breaks_major <- pretty(y_limits, 10)
     y_breaks_minor <- pretty(y_limits, 20)
-    y_label <- "Residual P-score"
-    plot_title <- "Residual P-scores across CIV values"
-    plot_subtitle <- paste0(
-      "Colored lines: Top ", length(best),
-      " interventions at the first CIV ( " , CIVs[1] ," ). \nDashed line: Residual Average (approximately 0)."
-    )
+    y_label <- "P-score Deviance"
+    plot_title <- "P-score Deviance across CIV values"
+    plot_subtitle <- "Dashed line: Average of residual P-scores (approximately 0)"
   } else {
     y_limits <- c(0, 1)
     y_breaks_major <- seq(0, 1, by = 0.1)
     y_breaks_minor <- seq(0, 1, by = 0.05)
     y_label <- "P-score"
     plot_title <- "P-scores across CIV values"
-    plot_subtitle <- paste0(
-      "Colored lines: Top ", length(best),
-      " interventions at the first CIV (", CIVs[1], "). \nDashed line: average P-score of highlighted interventions."
-    )
+    plot_subtitle <- "Dashed line: Average P-score"
 
   }
-
-  suppressPackageStartupMessages(library(ggplot2))
 
   gg <- ggplot(df_long, aes(x = CIVs, y = pscore, group = interv, color = interv)) +
     geom_line(data = subset(df_long, !is_best), linewidth = 0.5, alpha = 0.65) +
